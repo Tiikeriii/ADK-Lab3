@@ -12,6 +12,8 @@ public class BipRed {
     Kattio io;
 	int x, y, e;
 	int[][] edges;
+	int[][] matchedEdges;
+	int maxMatch;
     
     void readBipartiteGraph() {
 		// Läs antal hörn och kanter
@@ -55,37 +57,43 @@ public class BipRed {
     
     
     void readMaxFlowSolution() {
-	// Läs in antal hörn, kanter, källa, sänka, och totalt flöde
-	// (Antal hörn, källa och sänka borde vara samma som vi i grafen vi
-	// skickade iväg)
-	int v = io.getInt();
-	int s = io.getInt();
-	int t = io.getInt();
-	int totflow = io.getInt();
-	int e = io.getInt();
-	
-	for (int i = 0; i < e; ++i) {
-	    // Flöde f från a till b
-	    int a = io.getInt();
-	    int b = io.getInt();
-	    int f = io.getInt();
-	}
+		// Läs in antal hörn, kanter, källa, sänka, och totalt flöde
+		// (Antal hörn, källa och sänka borde vara samma som vi i grafen vi
+		// skickade iväg)
+		int v = io.getInt();
+		int s = io.getInt();
+		int t = io.getInt();
+		int totflow = io.getInt();
+		int lines = io.getInt();
+		
+		matchedEdges = new int[totflow][2];
+		maxMatch = 0;
+
+		for (int i = 0; i < lines; ++i) {
+			// Flöde f från a till b
+			int a = io.getInt();
+			int b = io.getInt();
+			int f = io.getInt();
+			if (a != s && b != t && f > 0) {
+				matchedEdges[maxMatch][0] = a;
+				matchedEdges[maxMatch][1] = b;
+				maxMatch++;
+			}
+		}
     }
     
     
     void writeBipMatchSolution() {
-	int x = 17, y = 4711, maxMatch = 0;
-	
-	// Skriv ut antal hörn och storleken på matchningen
-	io.println(x + " " + y);
-	io.println(maxMatch);
-	
-	for (int i = 0; i < maxMatch; ++i) {
-	    int a = 5, b = 2323;
-	    // Kant mellan a och b ingår i vår matchningslösning
-	    io.println(a + " " + b);
-	}
-	
+		// Skriv ut antal hörn och storleken på matchningen
+		io.println(x + " " + y);
+		io.println(maxMatch);
+		
+		for (int i = 0; i < maxMatch; ++i) {
+			int a = matchedEdges[i][0];
+			int b = matchedEdges[i][1];
+			// Kant mellan a och b ingår i vår matchningslösning
+			io.println(a + " " + b);
+		}
     }
     
     BipRed() {
