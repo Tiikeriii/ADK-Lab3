@@ -10,32 +10,41 @@
 
 public class BipRed {
     Kattio io;
+	int x, y, e;
+	int[][] edges;
     
     void readBipartiteGraph() {
-	// Läs antal hörn och kanter
-	int x = io.getInt();
-	int y = io.getInt();
-	int e = io.getInt();
+		// Läs antal hörn och kanter
+		x = io.getInt();
+		y = io.getInt();
+		e = io.getInt();
+		edges = new int[e][2];
 	
-	// Läs in kanterna
-	for (int i = 0; i < e; ++i) {
-	    int a = io.getInt();
-	    int b = io.getInt();
-	}
+		// Läs in kanterna
+		for (int i = 0; i < e; ++i) {
+			edges[i][0] = io.getInt();
+			edges[i][1] = io.getInt();
+		}
     }
     
     
     void writeFlowGraph() {
-	int v = 23, e = 0, s = 1, t = 2;
-	
+	int numEdges = x + y + e;
+	int s = x + y + 1;
+	int t = x + y + 2;
+	int v = x + y + 2;
 	// Skriv ut antal hörn och kanter samt källa och sänka
 	io.println(v);
 	io.println(s + " " + t);
-	io.println(e);
-	for (int i = 0; i < e; ++i) {
-	    int a = 1, b = 2, c = 17;
-	    // Kant från a till b med kapacitet c
-	    io.println(a + " " + b + " " + c);
+	io.println(numEdges);
+	for (int i = 1; i <= x; i++ ) {
+		io.println(s + " " + i + " 1");
+	}
+	for (int i = 0; i < e; i++) {
+		io.println(edges[i][0] + " " + edges[i][1] + " 1");
+	}
+	for (int i = x + 1; i <= x + y; i++) {
+		io.println(i + " " + t + " 1");
 	}
 	// Var noggrann med att flusha utdata när flödesgrafen skrivits ut!
 	io.flush();
