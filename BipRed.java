@@ -8,6 +8,8 @@
  * @author: Per Austrin
  */
 
+
+
 public class BipRed {
     Kattio io;
 	int x, y, e;
