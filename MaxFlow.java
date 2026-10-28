@@ -2,24 +2,26 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ArrayDeque;
 
-@SuppressWarnings("unchecked")
 public class MaxFlow {
     int v, s, t, e;
+    int cnt = 0;
+    int[] head, next, to, cap, origCap;
     ArrayList<int[]> edgeList;
-    ArrayList<Integer>[] adjList;
-    int[][] c;
-    int[][] cf;
     public void readFlowGraph() {
         for (int[] edge : edgeList) {
             int a = edge[0];
             int b = edge[1];
-            int cap = edge[2];
-            if (c[a][b] == 0 && c[b][a] == 0) {
-                adjList[a].add(b);
-                adjList[b].add(a);
-            }
-            c[a][b] += cap;
-            cf[a][b] += cap;
+            int c = edge[2];
+            to[cnt] = b;
+            cap[cnt] = c;
+            origCap[cnt] = c;
+            next[cnt] = head[a];
+            head[a] = cnt++;
+            to[cnt] = a;
+            cap[cnt] = 0;
+            origCap[cnt] = 0;
+            next[cnt] = head[b];
+            head[b] = cnt++;
         }
     }
 
@@ -38,10 +40,11 @@ public class MaxFlow {
             visited[s] = true;
             while (!q.isEmpty() && !visited[t]) {
                 int u = q.poll();
-                for (int w : adjList[u]) {
-                    if (cf[u][w] > 0 && !visited[w]) {
+                for (int i = head[u]; i != -1; i = next[i]) {
+                    int w = to[i];
+                    if (cap[i] > 0 && !visited[w]) {
                         visited[w] = true;
-                        parent[w] = u;
+                        parent[w] = i;
                         q.add(w);
                     }
                 }
@@ -50,19 +53,18 @@ public class MaxFlow {
                 break;
             }
             int r = Integer.MAX_VALUE;
-            for (int x = t; x != s; x = parent[x]) {
-                r = Math.min(r, cf[parent[x]][x]);
+            for (int u = t; u != s; u = to[parent[u] ^ 1]) {
+                r = Math.min(r, cap[parent[u]]);
             }
-            for (int x = t; x != s; x = parent[x]) {
-                cf[parent[x]][x] -= r;
-                cf[x][parent[x]] += r;
+            for (int u = t; u != s; u = to[parent[u] ^ 1]) {
+                cap[parent[u]] -= r;
+                cap[parent[u] ^ 1] += r;
             }
         }
-        for (int a = 1; a <= v; a++) {
-            for (int b : adjList[a]) {
-                if (c[a][b] > 0 && c[a][b] - cf[a][b] > 0) {
-                    flowGraph.add(new int[] {a, b, (c[a][b] - cf[a][b])});
-                }
+        for (int i = 0; i < cnt; i += 2) {
+            int f = origCap[i] - cap[i];
+            if (f > 0) {
+                flowGraph.add(new int[] {to[i ^ 1], to[i], f});
             }
         }
         return flowGraph;
@@ -74,11 +76,12 @@ public class MaxFlow {
             this.t = t;
             this.e = e;
             this.edgeList = edgeList;
-            adjList = new ArrayList[v + 1];
-            for (int i = 0; i <= v; i++) {
-                adjList[i] = new ArrayList<>();
-            }
-            c = new int[v + 1][v + 1];
-            cf = new int[v + 1][v + 1];
+            head = new int[v + 1];
+            java.util.Arrays.fill(head, -1);
+            int m = 2 * e;
+            next = new int[m];
+            to  = new int[m];
+            cap = new int[m];
+            origCap = new int[m];
         }
 }
