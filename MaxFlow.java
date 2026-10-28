@@ -1,24 +1,19 @@
 import java.util.ArrayList;
+import java.util.List;
 import java.util.ArrayDeque;
 
 @SuppressWarnings("unchecked")
 public class MaxFlow {
-    Kattio io = new Kattio(System.in, System.out);
-    int v = io.getInt();
-    int s = io.getInt();
-    int t = io.getInt();
-    int e = io.getInt();
-    ArrayList<Integer>[] adjList = new ArrayList[v + 1];
-    int[][] c = new int[v + 1][v + 1];
-    int[][] cf = new int[v + 1][v + 1];
-    void readFlowGraph() {
-        for (int i = 0; i <= v; i++) {
-            adjList[i] = new ArrayList<>();
-        }
-        for (int i = 0; i < e; i++) {
-            int a = io.getInt();
-            int b = io.getInt();
-            int cap = io.getInt();
+    int v, s, t, e;
+    ArrayList<int[]> edgeList;
+    ArrayList<Integer>[] adjList;
+    int[][] c;
+    int[][] cf;
+    public void readFlowGraph() {
+        for (int[] edge : edgeList) {
+            int a = edge[0];
+            int b = edge[1];
+            int cap = edge[2];
             if (c[a][b] == 0 && c[b][a] == 0) {
                 adjList[a].add(b);
                 adjList[b].add(a);
@@ -28,8 +23,8 @@ public class MaxFlow {
         }
     }
 
-    void edmondKarp() {
-        int totalFlow = 0;
+    public List<int[]> edmondKarp() {
+        List<int[]> flowGraph = new ArrayList<>();
         int[] parent = new int[v + 1];
         boolean[] visited = new boolean[v + 1];
         ArrayDeque<Integer> q = new ArrayDeque<>();
@@ -62,39 +57,28 @@ public class MaxFlow {
                 cf[parent[x]][x] -= r;
                 cf[x][parent[x]] += r;
             }
-            totalFlow += r;
         }
-        int f = 0;
-        for (int a = 1; a <= v; a++) {
-            for (int b : adjList[a]) {
-                if (c[a][b] > 0 &&  c[a][b] - cf[a][b] > 0) {
-                    f++;
-                }
-            }
-        }
-        io.println(v);
-        io.println(s + " " + t + " " + totalFlow);
-        io.println(f);
         for (int a = 1; a <= v; a++) {
             for (int b : adjList[a]) {
                 if (c[a][b] > 0 && c[a][b] - cf[a][b] > 0) {
-                    io.println(a + " " + b + " " + (c[a][b] - cf[a][b]));
+                    flowGraph.add(new int[] {a, b, (c[a][b] - cf[a][b])});
                 }
             }
         }
-        io.flush();
+        return flowGraph;
     }
 
-        MaxFlow() {
-
-            readFlowGraph();
-
-            edmondKarp();
-
-            io.close();
+        public MaxFlow(int v, int s, int t, int e, ArrayList<int[]> edgeList) {
+            this.v = v;
+            this.s = s;
+            this.t = t;
+            this.e = e;
+            this.edgeList = edgeList;
+            adjList = new ArrayList[v + 1];
+            for (int i = 0; i <= v; i++) {
+                adjList[i] = new ArrayList<>();
+            }
+            c = new int[v + 1][v + 1];
+            cf = new int[v + 1][v + 1];
         }
-    
-    public static void main(String args[]) {
-        new MaxFlow();
-    }
 }
