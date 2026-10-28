@@ -8,13 +8,14 @@
  * @author: Per Austrin
  */
 
-
+import java.util.ArrayList;
+import java.util.List;
 
 public class BipRed {
     Kattio io;
-	int x, y, e;
+	int x, y, e, s, t;
 	int[][] edges;
-	int[][] matchedEdges;
+	List<int[]> matchedEdges;
 	int maxMatch;
     
     void readBipartiteGraph() {
@@ -31,55 +32,41 @@ public class BipRed {
 		}
     }
     
-    
-    void writeFlowGraph() {
-	int numEdges = x + y + e;
-	int s = x + y + 1;
-	int t = x + y + 2;
-	int v = x + y + 2;
-	// Skriv ut antal hörn och kanter samt källa och sänka
-	io.println(v);
-	io.println(s + " " + t);
-	io.println(numEdges);
-	for (int i = 1; i <= x; i++ ) {
-		io.println(s + " " + i + " 1");
-	}
-	for (int i = 0; i < e; i++) {
-		io.println(edges[i][0] + " " + edges[i][1] + " 1");
-	}
-	for (int i = x + 1; i <= x + y; i++) {
-		io.println(i + " " + t + " 1");
-	}
-	// Var noggrann med att flusha utdata när flödesgrafen skrivits ut!
-	io.flush();
-	
-	// Debugutskrift
-	System.err.println("Skickade iväg flödesgrafen");
+    private List<int[]> writeFlowGraph() {
+		int numEdges = x + y + e;
+		s = x + y + 1;
+		t = x + y + 2;
+		int v = x + y + 2;
+		ArrayList<int[]> edgeList = new ArrayList<>();
+		for (int i = 1; i <= x; i++ ) {
+			edgeList.add(new int[] {s, i, 1});
+		}
+		for (int i = 0; i < e; i++) {
+			edgeList.add(new int[] {edges[i][0], edges[i][1], 1});
+		}
+		for (int i = x + 1; i <= x + y; i++) {
+			edgeList.add(new int[] {i, t, 1});
+		}
+		MaxFlow flow = new MaxFlow(v, s, t, numEdges, edgeList);
+		flow.readFlowGraph();
+		return flow.edmondKarp();
     }
     
-    
-    void readMaxFlowSolution() {
+    void readMaxFlowSolution(List<int[]> flowGraph) {
 		// Läs in antal hörn, kanter, källa, sänka, och totalt flöde
 		// (Antal hörn, källa och sänka borde vara samma som vi i grafen vi
 		// skickade iväg)
-		int v = io.getInt();
-		int s = io.getInt();
-		int t = io.getInt();
-		int totflow = io.getInt();
-		int lines = io.getInt();
 		
-		matchedEdges = new int[totflow][2];
+		matchedEdges = new ArrayList<>();
 		maxMatch = 0;
 
-		for (int i = 0; i < lines; ++i) {
+		for (int[] flow : flowGraph) {
 			// Flöde f från a till b
-			int a = io.getInt();
-			int b = io.getInt();
-			int f = io.getInt();
+			int a = flow[0];
+			int b = flow[1];
+			int f = flow[2];
 			if (a != s && b != t && f > 0) {
-				matchedEdges[maxMatch][0] = a;
-				matchedEdges[maxMatch][1] = b;
-				maxMatch++;
+				matchedEdges.add(new int[] {a, b});
 			}
 		}
     }
@@ -88,14 +75,15 @@ public class BipRed {
     void writeBipMatchSolution() {
 		// Skriv ut antal hörn och storleken på matchningen
 		io.println(x + " " + y);
-		io.println(maxMatch);
+		io.println(matchedEdges.size());
 		
-		for (int i = 0; i < maxMatch; ++i) {
-			int a = matchedEdges[i][0];
-			int b = matchedEdges[i][1];
+		for (int[] E : matchedEdges) {
+			int a = E[0];
+			int b = E[1];
 			// Kant mellan a och b ingår i vår matchningslösning
 			io.println(a + " " + b);
 		}
+		io.flush();
     }
     
     BipRed() {
@@ -103,9 +91,9 @@ public class BipRed {
 	
 	readBipartiteGraph();
 	
-	writeFlowGraph();
+	List<int[]> flowGraph = writeFlowGraph();
 	
-	readMaxFlowSolution();
+	readMaxFlowSolution(flowGraph);
 	
 	writeBipMatchSolution();
 
@@ -120,4 +108,3 @@ public class BipRed {
 	new BipRed();
     }
 }
-
